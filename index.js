@@ -24,14 +24,17 @@ const persons = [
   }
 ]
 
+// localhost:3001-sivun näkymä käyttäjälle
 app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
+// Kaikkien tietueiden näyttäminen localhost:3001/api/persons-sivulla
 app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
+// Yksittäisen tietueen tulostaminen /api/persons/id-sivulla
 app.get('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
   // console.log(id)
@@ -39,14 +42,15 @@ app.get('/api/persons/:id', (request, response) => {
   // console.log(person)
 
   if (person) {
-    response.json(person)
+    response.json(person) // tulostaa JSON-muodossa yksittäisen numerotiedon
+    // response.send(`Name: ${person.name} <br> Number: ${person.number}`) <-- tällä saisi tulostettua numeron tiedot, en ole varma kumpaa tehtävänannossa 3.3 loppujen lopuksi haluttiin
   } else {
-    response.status(404).end()
-    console.log(response.status(404))
+    response.status(404).end() // Jos id:ta ei löydy, tulostaa 404 Not found -virheen
   }
 
 })
 
+// Info-sivun sisältö
 app.get('/info', (request, response) => {
   const personsLength = Number(persons.length)
   const date = new Date()
