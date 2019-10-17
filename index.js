@@ -1,7 +1,10 @@
 const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
 
-const persons = [
+app.use(bodyParser.json())
+
+let persons = [
   {
     name: "Arto Hellas",
     number: "040-1234567",
@@ -47,7 +50,50 @@ app.get('/api/persons/:id', (request, response) => {
   } else {
     response.status(404).end() // Jos id:ta ei löydy, tulostaa 404 Not found -virheen
   }
+})
 
+const generateId = () => {
+  const maxId = persons.length > 0
+  ? Math.max( ...persons.map(p => p.id))
+  : 0
+  return Math.round(Math.random() * (100 - maxId) + maxId)
+}
+
+// Tietueen lisääminen
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+    if(!body.name) {
+      // console.log("add name")
+      return response.status(400).json({
+      error: "Add name"
+      })
+
+    } else if (!body.number) {
+      // console.log("add number")
+      return response.status(400).json({
+        error: "Add number"
+      })
+
+    } else if (persons.some(p => p.name === body.name)) {
+      return response.status(400).json({
+        error: "Name is already added"
+    })
+    
+  } else if (persons.some(p => p.number === body.number)) {
+    return response.status(400).json({
+      error: "Number is already added"
+    })
+  }
+
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: generateId(),
+  }
+
+  persons = persons.concat(person)
+
+  response.json(person)
 })
 
 // Info-sivun sisältö
