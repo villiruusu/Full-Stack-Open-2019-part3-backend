@@ -2,10 +2,16 @@ const express = require('express')
 const morgan = require('morgan')
 const app = express()
 const bodyParser = require('body-parser')
+const cors = require('cors')
 
 
 app.use(bodyParser.json())
 
+//
+app.use(cors())
+
+
+// TEHTAVA 3.7-3.8 - Morgan middleware loggaus
 morgan.token('body', function (req, res) { return JSON.stringify(req.body)})
 
 app.use(morgan(function (tokens, req, res) {
@@ -30,15 +36,6 @@ app.use(morgan(function (tokens, req, res) {
 })
 )
 
-// const requestLogger = (request, response, next) => {
-//   console.log('Method:', request.method)
-//   console.log('Path:', request.path)
-//   console.log('Body:', request.body)
-//   console.log('---')
-//   next()
-// }
-
-// app.use(requestLogger)
 
 let persons = [
   {
@@ -151,13 +148,8 @@ app.post('/api/persons', (request, response) => {
   response.json(person)
 })
 
-// const unknownEndpoint = (request, response) => {
-//   response.status(404).send({ error: 'unknown endpoint'})
-// }
-//
-// app.use(unknownEndpoint)
 
-
-const PORT = 3001
-app.listen(PORT)
-console.log(`Server running on port ${PORT}`)
+const PORT = process.env.PORT || 3001
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
+})
