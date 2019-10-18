@@ -5,7 +5,30 @@ const bodyParser = require('body-parser')
 
 
 app.use(bodyParser.json())
-app.use(morgan('tiny'))
+
+morgan.token('body', function (req, res) { return JSON.stringify(req.body)})
+
+app.use(morgan(function (tokens, req, res) {
+  if (tokens.method(req, res) === "POST") {
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, 'content-length'), '-',
+      tokens['response-time'](req, res), 'ms',
+      tokens['body'](req, res)
+    ].join(' ')
+  } else {
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms'
+  ].join(' ')
+  }
+})
+)
 
 // const requestLogger = (request, response, next) => {
 //   console.log('Method:', request.method)
