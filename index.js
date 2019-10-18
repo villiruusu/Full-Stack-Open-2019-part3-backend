@@ -4,6 +4,16 @@ const bodyParser = require('body-parser')
 
 app.use(bodyParser.json())
 
+const requestLogger = (request, response, next) => {
+  console.log('Method:', request.method)
+  console.log('Path:', request.path)
+  console.log('Body:', request.body)
+  console.log('---')
+  next()
+}
+
+app.use(requestLogger)
+
 let persons = [
   {
     name: "Arto Hellas",
@@ -32,17 +42,25 @@ app.get('/', (request, response) => {
   response.send('<h1>Hello World!</h1>')
 })
 
-// Kaikkien tietueiden näyttäminen localhost:3001/api/persons-sivulla
+
+// TEHTÄVÄ 3.1 - Kaikkien tietueiden näyttäminen localhost:3001/api/persons-sivulla
 app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
-// Yksittäisen tietueen tulostaminen /api/persons/id-sivulla
+
+// TEHTÄVÄ 3.2 - Info-sivun sisältö
+app.get('/info', (request, response) => {
+  const personsLength = Number(persons.length)
+  const date = new Date()
+  response.send(`<p>Phonebook has info for ${personsLength} people</p> <p> ${date}</p>`)
+})
+
+
+// TEHTÄVÄ 3.3 - Yksittäisen tietueen tulostaminen /api/persons/id-sivulla
 app.get('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
-  // console.log(id)
   const person = persons.find(person => person.id === id)
-  // console.log(person)
 
   if (person) {
     response.json(person) // tulostaa JSON-muodossa yksittäisen numerotiedon
@@ -52,6 +70,17 @@ app.get('/api/persons/:id', (request, response) => {
   }
 })
 
+
+// TEHTÄVÄ 3.4 - Yksittäisen tietueen poistaminen
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  persons = persons.filter(person => person.id !== id)
+
+  response.status(204).end()
+})
+
+
+// TEHTÄVÄ 3.5 - Generoi random-id:n uudelle tietueelle, generateId kutsutaan tietuetta lisätessä id-kentän arvoksi
 const generateId = () => {
   const maxId = persons.length > 0
   ? Math.max( ...persons.map(p => p.id))
@@ -59,27 +88,27 @@ const generateId = () => {
   return Math.round(Math.random() * (100 - maxId) + maxId)
 }
 
-// Tietueen lisääminen
+
+// TEHTÄVÄT 3.5 ja 3.6 - Tietueen lisääminen
 app.post('/api/persons', (request, response) => {
   const body = request.body
+
     if(!body.name) {
-      // console.log("add name")
       return response.status(400).json({
       error: "Add name"
       })
 
     } else if (!body.number) {
-      // console.log("add number")
       return response.status(400).json({
         error: "Add number"
       })
 
-    } else if (persons.some(p => p.name === body.name)) {
+    } else if (persons.some(p => p.name === body.name)) { // testataan, ettei nimeä ole jo puhelinluettelossa
       return response.status(400).json({
         error: "Name is already added"
     })
-    
-  } else if (persons.some(p => p.number === body.number)) {
+
+  } else if (persons.some(p => p.number === body.number)) { // testataan, ettei numeroa ole jo puhelinluettelossa
     return response.status(400).json({
       error: "Number is already added"
     })
@@ -96,12 +125,11 @@ app.post('/api/persons', (request, response) => {
   response.json(person)
 })
 
-// Info-sivun sisältö
-app.get('/info', (request, response) => {
-  const personsLength = Number(persons.length)
-  const date = new Date()
-  response.send(`<p>Phonebook has info for ${personsLength} people</p> <p> ${date}</p>`)
-})
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint'})
+}
+
+app.use(unknownEndpoint)
 
 
 const PORT = 3001
