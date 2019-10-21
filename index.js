@@ -4,11 +4,10 @@ const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
 
-
-app.use(bodyParser.json())
-
-app.use(cors())
 app.use(express.static('build'))
+app.use(bodyParser.json())
+app.use(cors())
+
 
 
 // TEHTAVA 3.7-3.8 - Morgan middleware loggaus
