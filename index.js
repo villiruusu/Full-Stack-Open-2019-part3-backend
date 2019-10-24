@@ -1,8 +1,10 @@
+require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const app = express()
 const bodyParser = require('body-parser')
 const cors = require('cors')
+const Person = require('./models/person')
 
 app.use(express.static('build'))
 app.use(bodyParser.json())
@@ -65,10 +67,13 @@ app.get('/', (request, response) => {
 })
 
 
-// TEHTÄVÄ 3.1 - Kaikkien tietueiden näyttäminen localhost:3001/api/persons-sivulla
+// Kaikkien tietueiden näyttäminen localhost:3001/api/persons-sivulla, tietueet haetaan tietokannasta
 app.get('/api/persons', (request, response) => {
-  response.json(persons)
-})
+  //response.json(persons)
+  Person.find({}).then(people => {
+    response.json(people.map(person => person.toJSON()))
+  });
+});
 
 
 // TEHTÄVÄ 3.2 - Info-sivun sisältö
@@ -148,7 +153,7 @@ app.post('/api/persons', (request, response) => {
 })
 
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
