@@ -38,6 +38,7 @@ app.use(morgan(function (tokens, req, res) {
 )
 
 
+/* // Kovakoodattu puhelinluettelosisältö
 let persons = [
   {
     name: "Arto Hellas",
@@ -59,7 +60,7 @@ let persons = [
     number: "39-23-6423122",
     id: 4
   }
-]
+] */
 
 // localhost:3001-sivun näkymä käyttäjälle
 app.get('/', (request, response) => {
@@ -67,25 +68,24 @@ app.get('/', (request, response) => {
 })
 
 
-// Kaikkien tietueiden näyttäminen localhost:3001/api/persons-sivulla, tietueet haetaan tietokannasta
+// TEHTÄVÄ 3.13 - Kaikkien tietueiden näyttäminen localhost:3001/api/persons-sivulla, tietueet haetaan tietokannasta
 app.get('/api/persons', (request, response) => {
-  //response.json(persons)
   Person.find({}).then(people => {
     response.json(people.map(person => person.toJSON()))
   });
 });
 
 
-// TEHTÄVÄ 3.2 - Info-sivun sisältö
+/* // TEHTÄVÄ 3.2 - Info-sivun sisältö
 app.get('/info', (request, response) => {
   const personsLength = Number(persons.length)
   const date = new Date()
   response.send(`<p>Phonebook has info for ${personsLength} people</p> <p> ${date}</p>`)
-})
+}) */
 
 
 // TEHTÄVÄ 3.3 - Yksittäisen tietueen tulostaminen /api/persons/id-sivulla
-app.get('/api/persons/:id', (request, response) => {
+/* app.get('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
   const person = persons.find(person => person.id === id)
 
@@ -95,28 +95,56 @@ app.get('/api/persons/:id', (request, response) => {
   } else {
     response.status(404).end() // Jos id:ta ei löydy, tulostaa 404 Not found -virheen
   }
+}) */
+
+
+
+// TEHTÄVÄ 3.13 - Yksittäisen tietueen tietojen hakeminen tietokannasta
+app.get('/api/persons/:id', (request, response, next) => {
+  Person.findById(request.params.id)
+    .then(person => {
+      if (person) {
+        response.json(person.toJSON())
+      } else {
+        response.status(404).end()
+      }     
+    })
+    .catch(error => next(error))
 })
 
 
-// TEHTÄVÄ 3.4 - Yksittäisen tietueen poistaminen
+
+
+/* // TEHTÄVÄ 3.4 - Yksittäisen tietueen poistaminen
 app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id)
   persons = persons.filter(person => person.id !== id)
 
   response.status(204).end()
+}) */
+
+
+
+// TEHTÄVÄ 3.15 - Yksittäisen tietueen poistaminen tietokannasta
+app.delete('/api/persons/:id', (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id)
+    .then(result => {
+      response.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 
 // TEHTÄVÄ 3.5 - Generoi random-id:n uudelle tietueelle, generateId kutsutaan tietuetta lisätessä id-kentän arvoksi
-const generateId = () => {
+/* const generateId = () => {
   const maxId = persons.length > 0
   ? Math.max( ...persons.map(p => p.id))
   : 0
   return Math.round(Math.random() * (100 - maxId) + maxId)
 }
+ */
 
-
-// TEHTÄVÄT 3.5 ja 3.6 - Tietueen lisääminen
+/* // TEHTÄVÄT 3.5 ja 3.6 - Tietueen lisääminen
 app.post('/api/persons', (request, response) => {
   const body = request.body
 
@@ -150,7 +178,53 @@ app.post('/api/persons', (request, response) => {
   persons = persons.concat(person)
 
   response.json(person)
+}) */
+
+// TEHTÄVÄ 3.14 - Tallennetaan uudet numerot tietokantaan
+app.post('/api/persons', (request, response) => {
+  const body = request.body
+
+  if (!body.name) {
+    return response.status(400).json({
+    error: "Add name"
+    })
+
+  } else if (!body.number) {
+    return response.status(400).json({
+      error: "Add number"
+    })
+  }
+
+  const person = new Person({
+    name: body.name,
+    number: body.number,
+  })
+
+  person.save().then(savedPerson => {
+    response.json(savedPerson.toJSON())
+  })
 })
+
+
+// käsitellään olemattomat osoitteet
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
+// käsitellään errorit / virheelliset pyynnöt
+const errorHandler = (error, request, response, next) => {
+  console.error(error.message)
+
+  if (error.name === 'CastError' && error.kind == 'ObjectId') {
+    return response.status(400).send({ error: 'malformatted id' })
+  } 
+
+  next(error)
+}
+
+app.use(errorHandler)
 
 
 const PORT = process.env.PORT

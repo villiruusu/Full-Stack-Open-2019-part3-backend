@@ -12,7 +12,7 @@ const number = process.argv[4]
 const url =
   `mongodb+srv://villiruusu:${password}@cluster0-tt2jd.mongodb.net/phonebook?retryWrites=true&w=majority`
 
-mongoose.connect(url, { useNewUrlParser: true })
+mongoose.connect(url, { useNewUrlParser: true})
 
 const personSchema = new mongoose.Schema({
   name: String,
