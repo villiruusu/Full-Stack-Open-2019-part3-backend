@@ -16,7 +16,7 @@ app.use(cors())
 morgan.token('body', function (req, res) { return JSON.stringify(req.body)})
 
 app.use(morgan(function (tokens, req, res) {
-  if (tokens.method(req, res) === "POST") {
+  if (tokens.method(req, res) === 'POST') {
     return [
       tokens.method(req, res),
       tokens.url(req, res),
@@ -26,13 +26,13 @@ app.use(morgan(function (tokens, req, res) {
       tokens['body'](req, res)
     ].join(' ')
   } else {
-  return [
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
-    tokens.res(req, res, 'content-length'), '-',
-    tokens['response-time'](req, res), 'ms'
-  ].join(' ')
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, 'content-length'), '-',
+      tokens['response-time'](req, res), 'ms'
+    ].join(' ')
   }
 })
 )
@@ -72,8 +72,8 @@ app.get('/', (request, response) => {
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(people => {
     response.json(people.map(person => person.toJSON()))
-  });
-});
+  })
+})
 
 
 /* // TEHTÄVÄ 3.2 - Info-sivun sisältö
@@ -107,7 +107,7 @@ app.get('/api/persons/:id', (request, response, next) => {
         response.json(person.toJSON())
       } else {
         response.status(404).end()
-      }     
+      }
     })
     .catch(error => next(error))
 })
@@ -186,7 +186,7 @@ app.post('/api/persons', (request, response) => {
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
-/*   if (!body.name) {
+  /*   if (!body.name) {
     return response.status(400).json({
     error: "Add name"
     })
@@ -221,9 +221,9 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
 
-  if (error.name === 'CastError' && error.kind == 'ObjectId') {
+  if (error.name === 'CastError' && error.kind === 'ObjectId') {
     return response.status(400).send({ error: 'malformatted id' })
-  } else if (error.name === "ValidationError") {
+  } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
   }
 
@@ -233,7 +233,7 @@ const errorHandler = (error, request, response, next) => {
 app.use(errorHandler)
 
 
-const PORT = process.env.PORT || 3001 
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })

@@ -12,7 +12,7 @@ const number = process.argv[4]
 const url =
   `mongodb+srv://villiruusu:${password}@cluster0-tt2jd.mongodb.net/phonebook?retryWrites=true&w=majority`
 
-mongoose.connect(url, { useNewUrlParser: true})
+mongoose.connect(url, { useNewUrlParser: true })
 
 const personSchema = new mongoose.Schema({
   name: String,
@@ -21,23 +21,23 @@ const personSchema = new mongoose.Schema({
 
 const Person = mongoose.model('Person', personSchema)
 
-const person = new Person({ 
-    name: name,
-    number: number,
+const person = new Person({
+  name: name,
+  number: number,
 })
 
 
 if (name && number) {
-    person.save().then(response => {
-    console.log(`added ${person.name} number ${person.number} to phonebook`);
-    mongoose.connection.close();
-    })
+  person.save().then(response => {
+    console.log(`added ${person.name} number ${person.number} to phonebook`)
+    mongoose.connection.close()
+  })
 } else if (!name && !number) {
-    Person.find({}).then(result => {
-        console.log("phonebook:")
-        result.forEach(person => {
-            console.log(`${person.name} ${person.number}`)
-        })
-        mongoose.connection.close()
+  Person.find({}).then(result => {
+    console.log('phonebook:')
+    result.forEach(person => {
+      console.log(`${person.name} ${person.number}`)
     })
+    mongoose.connection.close()
+  })
 }
